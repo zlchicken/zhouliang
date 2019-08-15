@@ -66,4 +66,14 @@ def create_app(config_name):
 
     from info.modules.passport import passport_blu
     app.register_blueprint(passport_blu)
+
+    from info.modules.news import news_blu
+    app.register_blueprint(news_blu)
+
+    from info.modules.profile import profile_blu
+    app.register_blueprint(profile_blu)
+
+    # 注册自定义过滤器
+    from info.utils.common import do_index_class
+    app.add_template_filter(do_index_class, "indexClass")
     return app

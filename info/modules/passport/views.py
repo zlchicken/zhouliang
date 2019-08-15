@@ -105,7 +105,7 @@ def register():
     # 5. 保存用户登录状态
     session["nick_name"] = mobile
     session["mobile"] = mobile
-    session["id"] = user.id
+    session["user_id"] = user.id
     # 6. 返回注册结果
     return jsonify(errno=RET.OK, errmsg="register is OK!")
 
@@ -139,11 +139,12 @@ def login():
     # 4. 保存用户登录状态
     session["nick_name"] = mobile
     session["mobile"] = mobile
-    session["id"] = user.id
+    session["user_id"] = user.id
     # 5. 登录成功返回
     return jsonify(errno=RET.OK, errmsg=error_map[RET.OK])
 
+
 @passport_blu.route("/logout", methods=['POST'])
 def logout():
-    session.pop("id")
+    session.pop("user_id")
     return jsonify(errno=RET.OK, errmsg=error_map[RET.OK])

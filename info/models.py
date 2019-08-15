@@ -165,6 +165,7 @@ class Comment(BaseModel, db.Model):
     def to_dict(self):
         resp_dict = {
             "id": self.id,
+            "user_id":self.user_id,
             "create_time": self.create_time.strftime("%Y-%m-%d %H:%M:%S"),
             "content": self.content,
             "parent": self.parent.to_dict() if self.parent else None,
