@@ -5,13 +5,25 @@ function getCookie(name) {
 
 
 $(function () {
-
+    var click = 1
     $(".release_form").submit(function (e) {
         e.preventDefault()
-
-        // 发布新闻
+        // if ( click == 1){
+        //     click = 2
+        //     $(".input_sub").val("确认发布")
+        //     return
+        // }
         $(this).ajaxSubmit({
-            url: "/user/news_release",
+            beforeSubmit: function (request) {
+                // 在提交之前，对参数进行处理
+                for (var i = 0; i < request.length; i++) {
+                    var item = request[i]
+                    if (item["name"] == "content") {
+                        item["value"] = tinyMCE.activeEditor.getContent()
+                    }
+                }
+            },
+            url: "/profile/news_release",
             type: "POST",
             headers: {
                 "X-CSRFToken": getCookie('csrf_token')
@@ -22,7 +34,7 @@ $(function () {
                     window.parent.fnChangeMenu(6)
                     // 滚动到顶部
                     window.parent.scrollTo(0, 0)
-                }else {
+                } else {
                     alert(resp.errmsg)
                 }
             }

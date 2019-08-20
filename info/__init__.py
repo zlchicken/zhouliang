@@ -1,6 +1,6 @@
 import logging
 from logging.handlers import RotatingFileHandler
-from flask import Flask
+from flask import Flask, render_template, g
 
 # 可以用来指定session保存位置
 from flask_wtf import CSRFProtect
@@ -13,8 +13,7 @@ from config import config
 
 
 # 初始化数据库
-
-
+from info.utils.common import user_login_data
 
 db = SQLAlchemy()
 
@@ -73,7 +72,20 @@ def create_app(config_name):
     from info.modules.profile import profile_blu
     app.register_blueprint(profile_blu)
 
+    from info.modules.admin import admin_blu
+    app.register_blueprint(admin_blu)
+
     # 注册自定义过滤器
     from info.utils.common import do_index_class
     app.add_template_filter(do_index_class, "indexClass")
+
+    @app.errorhandler(404)
+    @user_login_data
+    def page_not_found(_):
+        user = g.user
+        data = {"user": user.to_dict() if user else None}
+        return render_template('news/404.html', data=data)
+
     return app
+
+

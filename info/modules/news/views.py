@@ -2,7 +2,7 @@ from flask import request, current_app, jsonify, render_template, g
 from sqlalchemy import and_
 
 from info import constants, db
-from info.models import News, Category, Comment, CommentLike
+from info.models import News, Category, Comment, CommentLike, User
 from info.utils.common import user_login_data
 from info.utils.response_code import RET
 from . import news_blu
@@ -21,12 +21,12 @@ def news_list():
     except Exception as e:
         current_app.logger.eror(e)
         return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
-
     # 默认选择最新数据分类
     filters = []
     if cid != 1:  # 查询的不是最新的数据
         # 需要添加条件
         filters.append(News.category_id == cid)
+    filters.append(News.status == 0)
     # 3. 查询数据
     try:
         paginate = News.query.filter(*filters).order_by(News.create_time.desc()).paginate(page, per_page, False)
@@ -60,12 +60,6 @@ def news_detail(news_id):
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="查询失败")
-    # 查询新闻分类
-    try:
-        news_class = Category.query.all()
-    except Exception as e:
-        current_app.logger.error(e)
-        return jsonify(errno=RET.DBERR, errmsg="查询失败")
     # 查询用户登陆状态
     user = g.user
     # 查询新闻数据
@@ -75,9 +69,15 @@ def news_detail(news_id):
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="查询失败")
+    # 当前登录用户是否关注当前新闻作者
+    is_followed = False
+    # 判断用户是否收藏过该新闻
+    if new_id.user and user:
+        if new_id.user in user.followed:
+            is_followed = True
     # 校验报404错误
     if not new_id:
-        return render_template("static/404.html")
+        return render_template("static/../../templates/news/404.html")
     # 进入详情页后要更新新闻的点击次数
     try:
         new_id.clicks += 1
@@ -114,10 +114,10 @@ def news_detail(news_id):
         comment_dict_list.append(comment_dict)
     # 返回数据
     data = {
-        "news": new_id,
+        'is_followed': is_followed,
+        "news": new_id.to_dict(),
         "user": user,
         "hot_news": hot_news,
-        "news_class": news_class,
         "is_collected": is_collected,
         "comments": comment_dict_list,
         "news_id": news_id,
@@ -274,3 +274,54 @@ def comment_like():
             current_app.logger.error(e)
             return jsonify(errno=RET.DBERR, errmsg="修改失败")
     return jsonify(errno=RET.OK, errmsg="点赞成功")
+
+
+@news_blu.route('/followed_user', methods=["POST"])
+@user_login_data
+def followed_user():
+    """关注或者取消关注用户"""
+
+    # 获取自己登录信息
+    user = g.user
+    if not user:
+        return jsonify(errno=RET.SESSIONERR, errmsg="未登录")
+
+    # 获取参数
+    user_id = request.json.get("user_id")
+    action = request.json.get("action")
+
+    # 判断参数
+    if not all([user_id, action]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    if action not in ("follow", "unfollow"):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    # 获取要被关注的用户
+    try:
+        other = User.query.get(user_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据查询错误")
+
+    if not other:
+        return jsonify(errno=RET.NODATA, errmsg="未查询到数据")
+
+    if other.id == user.id:
+        return jsonify(errno=RET.PARAMERR, errmsg="请勿关注自己")
+
+    # 根据要执行的操作去修改对应的数据
+    if action == "follow":
+        if other not in user.followed:
+            # 当前用户的关注列表添加一个值
+            user.followed.append(other)
+        else:
+            return jsonify(errno=RET.DATAEXIST, errmsg="当前用户已被关注")
+    else:
+        # 取消关注
+        if other in user.followed:
+            user.followed.remove(other)
+        else:
+            return jsonify(errno=RET.DATAEXIST, errmsg="当前用户未被关注")
+
+    return jsonify(errno=RET.OK, errmsg="操作成功")

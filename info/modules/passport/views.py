@@ -33,7 +33,6 @@ def get_image_code():
 
 @passport_blu.route('/sms_code', methods=['POST'])
 def send_sms_code():
-    print(1111)
     # 1.将前端参数转为字典
     mobile = request.json.get("mobile")
     image_code = request.json.get("image_code")
@@ -90,7 +89,6 @@ def register():
     if redis_sms_code != smscode:
         return jsonify(errno=RET.PARAMERR, errmsg=error_map[RET.PARAMERR])
     # 4. 初始化 user 模型，并设置数据并添加到数据库
-    print(mobile,smscode,password)
     try:
         user = User()
         user.mobile = mobile
@@ -121,7 +119,6 @@ def login():
     try:
         user = User.query.filter_by(mobile=mobile).first()
         mobile_db = user.mobile
-        print(mobile_db)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg=error_map[RET.DBERR])
