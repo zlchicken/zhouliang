@@ -20,7 +20,7 @@ $(function () {
             alert('请选择性别')
         }
 
-        // TODO 修改用户信息接口
+ c              // TODO 修改用户信息接口 bvc  xcv  c                                
         var params = {
             "signature": signature,
             "nick_name": nick_name,

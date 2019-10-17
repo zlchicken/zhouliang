@@ -12,6 +12,7 @@ $(function(){
                 // 在提交之前，对参数进行处理
                 for(var i=0; i<request.length; i++) {
                     var item = request[i]
+                    alert(item["name"])
                     if (item["name"] == "content") {
                         item["value"] = tinyMCE.activeEditor.getContent()
                     }

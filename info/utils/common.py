@@ -13,6 +13,8 @@ def do_index_class(index):
         return "third"
     else:
         return ""
+
+
 def user_login_data(f):
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
@@ -26,5 +28,4 @@ def user_login_data(f):
 
         g.user = user
         return f(*args, **kwargs)
-
     return wrapper

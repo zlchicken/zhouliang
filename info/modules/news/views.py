@@ -72,6 +72,7 @@ def news_detail(news_id):
     # 当前登录用户是否关注当前新闻作者
     is_followed = False
     # 判断用户是否收藏过该新闻
+    print()
     if new_id.user and user:
         if new_id.user in user.followed:
             is_followed = True
@@ -88,7 +89,6 @@ def news_detail(news_id):
     is_collected = False
     if user:
         news_lists = user.collection_news.all()
-        print(news_lists)
         if new_id in news_lists:
             is_collected = True
     comments = Comment.query.filter_by(news_id=news_id).order_by(Comment.create_time.desc()).all()
@@ -101,7 +101,6 @@ def news_detail(news_id):
             # 取出所有被点赞评论ID
             for commentlike_user in commentlike_users:
                 comment_like_ids.append(commentlike_user.comment_id)
-    # print(comment_like_ids)
     # 遍历评论id,将评论属性赋值
     comment_dict_list = []
     for comment in comments:
@@ -190,20 +189,22 @@ def add_news_comment():
         return jsonify(errno=RET.NODATA, errmsg="数据不存在")
     # 初始化评论模型，保存数据
 
-    parent = Comment.query.filter_by(id=parent_id).first()
-    com = Comment()
-    com.news_id = news_id
-    com.user_id = user.id
-    com.content = content
-    com.parent_id = parent_id
-    com.parent = parent
-    db.session.add(com)
-    db.session.commit()
-    news_ids = Comment.query.filter(and_(Comment.news_id == news_id, Comment.user_id == user.id)).order_by(Comment.create_time.desc()).first()
+    try:
+        parent = Comment.query.filter_by(id=parent_id).first()
+        com = Comment()
+        com.news_id = news_id
+        com.user_id = user.id
+        com.content = content
+        com.parent_id = parent_id
+        com.parent = parent
+        db.session.add(com)
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库错误")
     # 配置文件设置了自动提交,自动提交要在return返回结果以后才执行commit命令,如果有回复
     # 评论,先拿到回复评论id,在手动commit,否则无法获取回复评论内容
     # 返回响应
-    print(news_ids.create_time)
     # data = {
     #     "user": user.to_dict(),
     #     "content": news_ids.content,

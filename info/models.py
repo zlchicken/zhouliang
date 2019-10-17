@@ -197,3 +197,8 @@ class Category(BaseModel, db.Model):
             "name": self.name
         }
         return resp_dict
+#
+# from flask_migrate import Migrate
+# def init_db(app):
+#     db.init_app(app)
+#     Migrate(app,db)

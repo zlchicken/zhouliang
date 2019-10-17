@@ -5,7 +5,8 @@ IMAGE_CODE_REDIS_EXPIRES = 300
 SMS_CODE_REDIS_EXPIRES = 60
 
 # 七牛空间域名
-QINIU_DOMIN_PREFIX = "http://oyucyko3w.bkt.clouddn.com/"
+# QINIU_DOMIN_PREFIX = "http://oyucyko3w.bkt.clouddn.com/"
+QINIU_DOMIN_PREFIX = ""
 
 # 首页展示最多的新闻数量
 HOME_PAGE_MAX_NEWS = 10
@@ -27,6 +28,11 @@ ADMIN_USER_PAGE_MAX_COUNT = 10
 
 # 管理员页面新闻每页多最数据条数
 ADMIN_NEWS_PAGE_MAX_COUNT = 10
+
+import os
+MEDIA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),"static","media")
+
+MEDIA_USER_PATH=os.path.join(MEDIA_PATH,"user")
 
 
 

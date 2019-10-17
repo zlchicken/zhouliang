@@ -39,5 +39,6 @@ def createsuperuser(name, password):
 
     print("添加成功")
 
+
 if __name__ == '__main__':
     manager.run()

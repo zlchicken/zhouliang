@@ -145,9 +145,7 @@ def user_list():
     total_page = 1
 
     try:
-        paginate = User.query.filter(User.is_admin == False).order_by(User.last_login.desc()).paginate(page,
-                                                                                                       constants.ADMIN_USER_PAGE_MAX_COUNT,
-                                                                                                       False)
+        paginate = User.query.filter(User.is_admin == False).order_by(User.last_login.desc()).paginate(page, constants.ADMIN_USER_PAGE_MAX_COUNT, False)
         users = paginate.items
         current_page = paginate.page
         total_page = paginate.pages
@@ -358,6 +356,7 @@ def news_edit_detail():
 
     # 获取Post数据
     news_id = request.form.get("news_id")
+    print("oooooooooo{}".format(news_id))
     title = request.form.get("title")
     digest = request.form.get("digest")
     content = request.form.get("content")

@@ -24,7 +24,6 @@ def index():
         return jsonify(errno=RET.DBERR, errmsg="查询失败")
     # 查询用户登陆状态
     user = g.user
-    print(user)
     data = {
         "user": user,
         "hot_news": hot_news,

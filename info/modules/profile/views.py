@@ -1,3 +1,5 @@
+import os
+
 from info import db, constants
 from info.models import User, Category, News
 from info.utils.common import user_login_data
@@ -35,9 +37,6 @@ def base_info():
     nick_name = request.json.get("nick_name")
     signature = request.json.get("signature")
     gender = request.json.get("gender")
-    print("*"*50)
-    print(gender)
-    print("*" * 50)
     # if gender == "男":
     #     gender = "MAN"
     # else:
@@ -64,7 +63,6 @@ def pass_info():
     new_password2 = request.json.get("new_password2")
     if not all([old_password, new_password, new_password2]):
         return jsonify(err=RET.DATAERR, errmsg="参数不完整")
-    print(old_password, new_password, new_password2)
     if new_password != new_password2:
         return jsonify(RET.DATAERR, errmsg="密码不一致")
     # 3. 校验密码
@@ -231,7 +229,6 @@ def other_info():
     return render_template('news/other.html', data=data)
 
 
-
 @profile_blu.route('/other_news_list')
 def other_news_list():
     """返回指定用户的发布的新闻"""
@@ -253,7 +250,6 @@ def other_news_list():
 
     if not other:
         return jsonify(errno=RET.NODATA, errmsg="当前用户不存在")
-    print("==================================================")
     try:
         paginate = other.news_list.paginate(page, constants.USER_COLLECTION_MAX_NEWS, False)
         # 获取当前页数据
@@ -276,3 +272,34 @@ def other_news_list():
         "current_page": current_page
     }
     return jsonify(errno=RET.OK, errmsg="OK", data=data)
+
+
+@profile_blu.route('/pic_info', methods=["GET", "POST"])
+@user_login_data
+def pic_info():
+    # 如果是GET请求,返回用户数据
+    if request.method == "GET":
+        user = g.user
+        return render_template("news/user_pic_info.html",user=user)
+    else:
+        avatar = request.files.get('avatar')
+        from uuid import uuid4
+        filename = str(uuid4()).replace("-","")+".jpg"
+        filepath = os.path.join(constants.MEDIA_USER_PATH,filename)
+        spath = os.path.join("/static/media/user",filename)
+        os.path.basename(spath)
+        relpath = os.path.join(constants.MEDIA_USER_PATH,os.path.basename(spath))
+        os.remove(relpath)
+        print(avatar)
+        avatar.save(filepath)
+        return jsonify(errno=500,errmsg="数据以传入")
+    # 如果是POST请求表示修改头像
+    # 1. 获取到上传的图片
+
+    # 2. 上传头像
+
+        # 使用自已封装的storage方法去进行图片上传
+
+    # 3. 保存头像地址
+    # 拼接url并返回数据
+    # return "hello world"

@@ -13,6 +13,7 @@ from config import config
 
 
 # 初始化数据库
+
 from info.utils.common import user_login_data
 
 db = SQLAlchemy()
